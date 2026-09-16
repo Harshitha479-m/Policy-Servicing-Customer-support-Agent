@@ -1,0 +1,12 @@
+import logging
+from pathlib import Path
+
+
+def configure_logging(log_path: Path = Path("data/agent.log")) -> None:
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+        handlers=[logging.StreamHandler(), logging.FileHandler(log_path, encoding="utf-8")],
+        force=True,
+    )
