@@ -33,5 +33,7 @@ data/*.log
 # IDE & OS Metadata
 .vscode/
 .idea/
+frontend/node_modules/
+frontend/dist/
 .DS_Store
 Thumbs.db

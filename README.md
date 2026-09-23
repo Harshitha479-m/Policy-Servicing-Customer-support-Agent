@@ -10,7 +10,7 @@ A read-only, retrieval-augmented insurance servicing agent that cross-references
 | :--- | :--- |
 | **1. Read access to policy administration data** | SQLite repository in `app/db.py` executing parameterized `SELECT` queries across insured customers, policy schedules, terms, deductibles, premiums, and active endorsement riders. |
 | **2. RAG pipeline over policy documents/endorsements** | `app/ingestion.py` extracts text from PDF, DOCX, TXT, and MD files with sliding window chunking and metadata preservation. `app/vector_store.py` builds an offline, deterministic vector index for similarity retrieval in `app/retrieval.py`. |
-| **3. Conversational interface for policyholders and brokers** | Streamlit application (`streamlit_app.py`) providing role-aware perspectives, case queue selector, policyholder vs broker views, verified source citations, and interactive RAG inspection sandbox. |
+| **3. Conversational interface for policyholders and brokers** | React application in `frontend/` backed by `api_server.py`, providing role-aware perspectives, case queue selector, verified source citations, and interactive RAG inspection sandbox. Streamlit remains available as a fallback. |
 | **4. Low-risk read-only scope for first deployment** | Strict architectural isolation: database queries are read-only; transactional intent classifier in `app/agent.py` intercepts and refuses mutations (cancellations, claims approvals, address updates, binding) and routes to licensed specialists; ungrounded questions below similarity thresholds trigger explicit refusals. |
 
 ---
@@ -35,8 +35,13 @@ A read-only, retrieval-augmented insurance servicing agent that cross-references
 python scripts/init_demo.py
 python scripts/ingest_documents.py
 
-# Launch the Streamlit application
-streamlit run streamlit_app.py
+# Start the read-only API
+python api_server.py
+
+# In a second terminal, install and launch the React dashboard
+cd frontend
+npm install
+npm run dev
 ```
 
 ### 2. Sign In
@@ -52,6 +57,8 @@ Use demo credentials:
 - **Conversations**: Dual-role support workspace with conversation queue, chat stream with verified citations, policyholder details, and active endorsements drawer.
 - **Policies**: Searchable policy directory with customer role indicators, terms, deductibles, premiums, risk locations, and instant "Open in Servicing Chat" buttons.
 - **Knowledge Base**: Document corpus inspector and interactive RAG similarity search sandbox to test retrieval against raw chunks.
+
+The React dashboard runs at the Vite URL (normally `http://localhost:5173`) and expects the API at `http://localhost:8000`. Set `VITE_API_URL` before `npm run dev` if the API is hosted elsewhere. The original Streamlit dashboard can still be launched with `streamlit run streamlit_app.py`.
 
 ---
 
@@ -89,7 +96,9 @@ Customer Support Agent/
 │   ├── init_demo.py        # Database initialization script
 │   └── ingest_documents.py # Document ingestion and vector index build script
 ├── tests/                  # Unit and integration test suite
-├── streamlit_app.py        # Multi-view Streamlit servicing dashboard
+├── api_server.py           # Read-only JSON API for the React dashboard
+├── frontend/               # Vite + React servicing dashboard
+├── streamlit_app.py        # Legacy multi-view Streamlit dashboard
 ├── requirements.txt        # Python package dependencies
 └── README.md               # Documentation and usage guide
 ```
